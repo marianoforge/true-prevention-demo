@@ -1,0 +1,2419 @@
+FORMAT: 1A
+HOST: https://api.cognifit.com
+
+# Integrating with CogniFit
+
+This documentation explains how to integrate the CogniFit assessments, trainings and games in your website or Apps.
+
+##Getting started
+
+You have to become a partner in order get access to the API.
+
+### How do I become a CogniFit partner?
+
+To access and utilize the CogniFit API, you'll need to register on to our developer platform. This platform provides the necessary tools and documentation for integrating CogniFit's features into your applications, allowing you to leverage their cognitive assessment and training functionalities.To use the CogniFit API sign up to our <a href="https://www.cognifit.com/developers">Sign Up Now to the CogniFit developers platform</a>.
+
+
+### How do I choose the right integration for me?
+
+Once you have your client_id, a client_secret and a client_hash you will be able to integrate with CogniFit by implementing the following two steps:
+
+1) Backend integration (users and data management)
+    - <a href="https://packagist.org/packages/cognifit/cognifit-sdk-php">PHP SDK</a>
+    - Other languages requires <a href="#reference/0">direct integration</a> with our API
+
+2) Frontend integration (Training and games interface)
+    - <a href="https://www.npmjs.com/package/@cognifit/launcher-js-sdk">SDK for web HTML/Javascript</a>
+    - <a href="#introduction/frontend-integration">Apps Frontend Integration</a> 
+    
+The integration process with CogniFit is truly straightforward, enabling users of our partners to access all the products and benefits of CogniFit directly through our partners' applications or websites. You can find the simplest way to begin integrating CogniFit in this <a href="https://support.cognifit.com/s/article/simplified-Integration-Partnering-with-CogniFit-Made-Easy?language=en_US">post</a>.
+
+### What will be the user experience to access the assessment and training games?
+
+After integrating the API into your website, you will be able to place your custom button to launch CogniFit Training Games and Assessments.
+ 
+### What kind of support will I receive?
+
+All CogniFit products come with email support from staff during CET business hours. All accounts are limited to five technical (troubleshooting) questions per year, but have unlimited support for billing-related issues, account-related issues, and incident reports. Additonnaly some partner plan includes hours of integration support assistance.
+ 
+
+## API limits
+
+Api calls are limited by partner. This limitation is done by a fixed window algorithm which allows 90 calls per minute.
+
+If the limitation is exceeded, the request will return a HTTP 429 error and will be dismissed. The API rate limits refer to POST and GET endpoints.
+
+Rate limiting of the API is primarily on a per-partner basis — or more accurately described, per user access token. If a method allows for 60 requests per rate limit window, then it allows 60 requests per window per access token.
+
+Rate limits are divided into 60 seconds intervals. All endpoints require authentication, so there is no concept of unauthenticated calls and rate limits.
+
+In addition to these general rate limits, there is a specific restriction applied to user and associate registration endpoints. These endpoints are limited to a maximum of 10 registration requests per minute, counted over a rolling 10-minute period.
+
+## Security
+
+For security, the client_secret must never be used or published out of the partner server. The partner must provide the possible callback URLs that will be used for redirection after some API requests.
+
+As you integrate CogniFit API we want to remind you of the real and present danger of hackers, who aim to spread spam, install malware and generally promote mayhem across the web. To that end, this page is to inform you of many threats that exists, and good practices you can use to help keep your application as safe as possible.
+
+### Password Retention
+
+In short, do not retain passwords. Instead, opt to use OAuth tokens where possible. Encrypt other sensitive data as needed.
+
+### Input Validation
+
+Don’t assume that your users will provide you with valid, trustworthy data. Sanitize all data, checking for sane string lengths, valid file types, etc. CogniFit attempts to sanitize data POSTed to our APIs, but a little client-side help goes a long way. Whitelist the types of input that are acceptable to your application and discard everything that isn’t on the whitelist.
+
+### Unencrypted Communication (no SSL)
+
+CogniFit provides all REST API methods over SSL. Whenever your code might be operating on an untrusted network (that is, if you’re developing a client application), please make use of SSL for all authenticated or sensitive requests. For example, posting a status, requesting recent direct messages, and updating profile attributes should all be performed over SSL in a CogniFit client. It’s safe and suggested to use SSL in conjunction with OAuth. Service-to-service communication should also be encrypted wherever possible. Modern hardware eliminates most performance impact for encrypted traffic.
+
+### Tokens and Secrets
+
+CogniFit APIs rely on OAuth for authorizing each call. When working with an access token and token secret, be sure to encrypt them (and other sensitive data) as safely as possible. At CogniFit, we use bcrypt-ruby as needed.
+
+Once you become an premium CogniFit partner you will get access to your receive a client_id, a client_secret and a client_hash for authentication and you will be able to start using the API. 
+
+
+### Exposed Debugging Information
+
+Be sure that you’re not exposing sensitive information through debugging screens/logs. Some web frameworks make it easy to access debugging information if your application is not properly configured. For desktop and mobile developers, it’s easy to accidentally ship a build with debugging flags or symbols enabled. Build checks for these configurations into your deployment/build process.
+
+### Inadequate Testing
+
+Ensure that your tests check not just that you can do what should be able to do, but that bad guys can’t do what they shouldn’t be able to do. Put yourself in an attacker’s mindset and whip up some evil tests.
+
+### The Law
+
+If your application is (going to be) handling money, you may be required by law to adhere to certain security practices and regulations. Find out what’s applicable to you and make sure you’re up to code.
+
+### Unfiltered Input, Unescaped Output
+
+One easy-to-remember approach to input validation is FIEO: Filter Input, Escape Output. Filter anything from outside your application, including CogniFit API data, cookie data, user-supplied form input, URL parameters, data from databases, etc. Escape all output being sent by your application, including SQL sent to your database server, HTML to you send to users’ browsers, JSON/XML output sent to other systems, and commands sent to shell programs.
+
+### Cross-Site Scripting (XSS)
+
+<a href="https://en.wikipedia.org/wiki/Cross-site_scripting">XSS attacks</a> are, by most measures, the most common form of security problem on the web. In short, if an attacker can get their own JavaScript code into your application, they can do bad stuff. Anywhere you store and display untrusted, user-supplied data needs to be checked, sanitized, and HTML escaped. Getting this right is hard, because hackers have <a href="https://www.owasp.org/index.php/Types_of_Cross-Site_Scripting">many different ways to land XSS attacks</a>. Your language or web development framework probably has a popular, well-tested mechanism for defending against cross-site scripting; please make use of it.
+
+Generally: if HTML isn’t needed from some user-facing form, filter it out; for example, there’s no reason to allow anything other than integers when storing a phone number. If HTML is needed, use a known-good whitelist filter. <a href="http://htmlpurifier.org/">HTMLPurifier</a> for PHP is one such solution. Different contexts may require different filtering approaches. See the <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">OWASP XSS Prevention Cheat Sheet</a> for more on filtering.
+
+### SQL Injection
+
+If your application makes use of a database, you need to be aware of <a href="https://en.wikipedia.org/">SQL injection</a>. Again, anywhere you accept input is a potential target for an attacker to break out of their input field and into your database. Use database libraries that protect against SQL injection in a systematic way. If you break out of that approach and write custom SQL, write aggressive tests to be sure you aren’t exposing yourself to this form of attack.
+
+The two main approaches to defending against SQL injection are escaping before constructing your SQL statement and using parameterized input to create statements. The latter is recommended, as it’s less prone to programmer error.
+
+### Cross-Site Request Forgery (CSRF)
+
+Are you sure that requests to your application are coming from your application? <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">CSRF</a> attacks exploit this lack of knowledge by forcing logged-in users of your site to silently open URLs that perform actions. In the case of a CogniFit app, this could mean that attackers are using your app to force users to post unwanted tweets or follow spam accounts. You can learn more about this sort of attack on PHP security expert <a href="http://shiflett.org/articles/cross-site-request-forgeries">Chris Shiflett’s blog</a>.
+
+The most thorough way to deal with CSRF is to include a random token in every form that’s stored someplace trusted; if a form doesn’t have the right token, throw an error. Modern web frameworks have systematic ways of handling this, and might even be doing it by default if you’re lucky. A simple preventative step (but by no means the only step you should take) is to make any actions that create, modify, or destroy data require a POST request.
+
+### Lack of Rate Limiting
+
+CAPTCHAs where appropriate to slow down potential spammers and attackers.
+
+### Lack of Information about Threats
+
+If you think there’s an issue with your web application, how do you find out for sure? Have critical exceptions and errors emailed to you and keep good logs. You may want to put together a dashboard of critical statistics so that you can see at a glance if something is going wrong (or staying right).
+
+### Desktop Application Security
+
+We could use suggestions from desktop developers about the security issues they’ve run into. Developers working in sufficiently high-level languages shouldn’t be dealing with buffer overflows and the usual security issues. What have you defended against?
+
+### Unencrypted Storage of Credentials
+
+As aforementioned, for optimal security you should be using OAuth. But once you have a token with which to make requests on behalf of a user, where do you put it? Ideally, in an encrypted store managed by your operating system. On Mac OS X, this would be the Keychain. In the GNOME desktop environment, there’s the <a href="https://wiki.gnome.org/action/show/Projects/GnomeKeyring?action=show&redirect=GnomeKeyring">Keyring</a>. In the KDE desktop environment, there’s <a href="https://docs.kde.org/stable/en/kdeutils/kwallet/index.html">KWallet</a>.
+
+### Security Resources
+
+The below links are great ways to learn more about security. Security is a deep topic, but don’t feel like you have to learn everything about it before taking proactive steps to lock down your application. A little security-mindedness goes a long way.
+
+#### General
+
++ <a href="http://www.cerias.purdue.edu/">Purdue CERIAS</a> - Center for Education and Research in Information Assurance and Security
++ <a href="https://www.us-cert.gov/">US-CERT</a> - current identified threats for various platforms and applications
++ <a href="https://www.sei.cmu.edu/index.cfm">CERT Information for Developers</a> - secure coding practices
+
+#### Web Application Security
+
++ <a href="https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Project">OWASP Top Ten Threats</a> - the definitive list of the most pressing threats facing web application developers.
++ <a href="https://en.wikipedia.org/wiki/Intrusion_detection_system">Intrusion detection</a> - you may want to run an <a href="https://en.wikipedia.org/wiki/Intrusion_detection_system">Intrusion Detection System</a> (IDS) to find potential attackers.
+
+#### Desktop Application Security
+
++ <a href="https://developer.apple.com/library/archive/documentation/Security/Conceptual/Security_Overview/Introduction/Introduction.html">Apple Developer Connection - Security</a>
++ <a href="https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Introduction.html">Apple Secure Coding Guide</a>
++ <a href="https://www.microsoft.com/en-us/msrc?rtc=1">Microsoft Security Techcenter</a>
++ <a href="https://dwheeler.com/secure-programs/">Secure Programming for Linux and Unix HOWTO</a>
+
+## Backend Integration
++ <a href="https://packagist.org/packages/cognifit/cognifit-sdk-php">PHP SDK</a>
++ Other languages requires <a href="#reference/0">direct integration</a> with our API
+
+## Frontend Integration
++ <a href="https://www.npmjs.com/package/@cognifit/launcher-js-sdk">SDK for web HTML/Javascript</a>
++ Apps Frontend Integration
+    
+    1) Loading an activity
+        
+        To load an assessment, a training session or a specific game you need the following data:
+        
+        1) the client key: an alphanumeric value linked to your CogniFit account, it’ll be provided to you to access the CogniFit API.
+        2) the access token: an alphanumeric value that identifies the user’s CogniFit account. Ideally it is requested in a server-to-server interaction through the user-creation or user-authentication endpoints.
+        3) the activity mode: a string that defines what the user will do. It has one of these three values:
+            - ‘assessmentMode’: loads an assessment;
+            - ‘trainingMode’: loads a training session;
+            - ‘gameMode’: loads a single game;
+        
+                Create an account in CogniFit to familiarize yourself with the differences between each mode of operation.
+                
+        4) the activity key: an alphanumeric value that sets the specific activity (which assessment, training session or game) to be performed. You can use the API to request all the values that can be used:
+            - for assessments;
+            - for training sessions;
+            - for games;
+        5) the version of the SDK to load: get this value from the following endpoint:
+        
+            https://api.cognifit.com/description/versions/sdkjs?v=2.0
+            
+            <i>Do not cache the value returned by this endpoint as it is not guaranteed to remain valid beyond a few days.</i>
+            
+        6) the type of device: a string with either ‘web’ or ‘app’. If set to ‘web’ our code will assume a computer where the main modes of interaction are a keyboard and mouse. If set to ‘app’ our code will assume a mobile device where the main mode of interaction is a touchscreen.
+    
+        The HTML/JS code that is loaded in your site or App’s webview must load the following script:
+        https://js.cognifit.com/${VERSION}/html5Loader.js
+        where ${VERSION} is the version of the SDK;
+
+        The simplest HTML would be:
+    
+        ```html
+        <html>
+          <body>
+            <div id="cogniFitContent">
+              <!-- our code will add an iframe here -->
+            </div>
+          </body>
+        </html>
+        ```
+
+        That script defines the variable HTML5JS with a single method: loadMode. The function requires the following arguments:
+            
+        1) the ${VERSION} string used in the script’s URL;
+        2) the activity mode;
+        3) the activity key;
+        4) the id of the element where our content will be loaded;
+        5) an object with the rest of the information required:
+            ```json
+            {
+                "clientId":"123456abcdef",
+                "accessToken":”t0k3n_t0k3n",
+                "appType":"app"
+            }
+            ```
+                
+        To load, for example, the Mahjong game, the following call needs to be made:
+        
+        ```js
+        HTML5JS.loadMode("A_VERSION", "gameMode","MAHJONG","cogniFitContent",
+            {
+                "clientId":"123456abcdef",
+                "accessToken":”t0k3n_t0k3n",
+                "appType":"app"
+            }
+        );
+        ```
+
+    2) Data flow from CogniFit to your site/app
+    
+        Once the iframe loads the activity can be started by the user. Once the activity is completed or aborted our code will do the following:
+
+        ```js
+        window.parent.postMessage(
+          {
+            status: 'completed' OR 'aborted',
+            mode: ${ACTIVITY_MODE},
+            key: ${ACTIVITY_KEY},
+          },
+          '*'
+        );
+        ```
+
+        Code on your end should handle this message and destroy the iframe as it cannot be reused.
+
+
+## Health Check                        [/health-check]
+
+### Health Check credentials                 [POST  /health-check]
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "callback_url":"https://callback.uri"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "callback_url": {
+                        "type": "string",
+                        "description": "One of the client callback url (optional)",
+                        "example": "https://callback.uri"
+                    }
+                },
+                "additionalProperties": false
+            }
+           
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + client_id                 (string) - If success
+            + client_name               (string) - If success
+            + client_email              (string) - If success
+            + client_type               (string) - If success
+            + client_training_units     (int) - If success
+            + client_assessment_units   (int) - If success
+            + client_callback_urls      (object) - If success
+            + error                     (string) - If there is any error
+            + errorMessage              (string) - If there is any error
+    
+    + Body
+
+            {
+                "client_id": "906354cf409c859a01053e29effc283ffc283fdr",
+                "client_name": "Test name",
+                "client_email": "email+test@cognifit.com",
+                "client_type": "CLINICIAN_USER",
+                "client_training_units": 64,
+                "client_assessment_units": 23
+            }
+
+## User registration                        [/registration]
+
+### Create new user account                 [POST   /registration]
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_name":"Daniel",
+                "user_lastname":"Olivares",
+                "user_email":"daniel.olivares@apitest.com",
+                "user_password":"123456",
+                "user_birthday":"1981-07-15",
+                "user_sex":1,
+                "user_locale":"en"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "User name (string 40)",
+                        "example": "Daniel"
+                    },
+                    "user_lastname": {
+                        "type": "string",
+                        "description": "User lastname (string 40)",
+                        "optional": true,
+                        "example": "Olivares"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "description": "User email (string 40)",
+                        "example": "daniel.olivares@apitest.com"
+                    },
+                    "user_password": {
+                        "type": "string",
+                        "description": "User password (string 10)",
+                        "example": "123456"
+                    },
+                    "user_birthday": {
+                        "type": "string",
+                        "description": "User birthday (string 6-50)",
+                        "example": "example": "1981-07-15"
+                    },
+                    "user_sex": {
+                        "type": "int",
+                        "enum": [0, 1],      // 0 Female / 1 Male
+                        "optional": true
+                    },
+                    "user_locale": {
+                        "type": "string",
+                        "enum": ["ar", "bg", "ca", "de", "el", "en", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"],
+                        "optional": true
+                    }
+                },
+                "additionalProperties": false
+            }
+           
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "user_token": "ca8a46fa6111a212d907fcc9baa1feff"
+            }
+
+### Associate existing user account         [GET    /user-authenticate{?client_id,user_email,callback_url,state}]
+If the user already exists in CogniFit, their account can be associated. Redirect the user to this 
+end point. If the user accepts to associate the CogniFit accout with the partner, the user_token will be
+sent back to the callback_url provided. The callback_url must be one of the callback urls
+communicated to CogniFit when the partner was created.
+
+State parameter is a hash generated by the partner. This value will be added to the callback response.
+
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + user_email: danioli@cognifit.com - (string 64)
+    + callback_url: partnerdomainorapp/afterassociate - (string 6-50)
+    + state: 31660cb1250a904a437a155b93c19892 - (string)
+
++ Response 201 (text/html; charset=UTF-8)
+
+
+## User authentication                      [/issue-access-token]
+
+### Issue user access token                 [POST   /issue-access-token]
+
+Method to get an access token. It must be sent back to CogniFit before it expires.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
++ Response 201 (application/json)
+
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "access_token"  : "UDDmUN9talZhUeWDZy0gufpGYif0aimwH8SjZTqj",
+                "expires"       : 1404930861,
+                "expires_in"    : 3600
+            }
+
+
+
+### Use access token to access CogniFit     [GET    /partner/{client_hash}{?client_id,user_token,callback_url}]  
+
+> After obtaining a user access token, it must be used before it expires in request. Send the access token to this endpoint using one of the following **endpoint domain**:
+1. To the partner landing page in CogniFit: https://www.cognifit.com/partner/{client_hash}
+2. To CogniFit app using the schema: CognifitPartner://login
+
+> **Parameters**: the domain of this endpoint is www.cognifit.com<br/>
+    1. client_id<br/>
+    2. client_hash<br/>
+    3. user_token (access token)<br/>
+    4. callback_url
+
++ Parameters
+    + client_hash:  yrwnlewEy5BfpBBgLcOtD32ieZF5QPq7DgdZKBSH7A9bPsCOirXmeqeU5vP     - (string 64)
+    + client_id:    906354cf409c859a01053e29effc283ffc283fdr                        - (string 40)
+    + user_token:   UDDmUN9talZhUeWDZy0gufpGYif0aimwH8SjZTqj                        - (string 40)
+    + callback_url: partnerdomainorapp/afterassociate                               - (string 255)
+
++ Response 201 (text/html; charset=UTF-8)
+
+
+## User manager                        [/patient]
+
+To be able to access user information and to set programs, that user needs to be activated. A user is set as activated when created.
+
+### Update user account                 [POST   /update-user]
+
+Updates user account information.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "user_name":"Daniel",
+                "user_lastname":"Olivares",
+                "user_email":"daniel.olivares@apitest.com",
+                "user_password":"123456",
+                "user_birthday":"1981-07-15",
+                "user_sex":1,
+                "user_locale":"en"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "User name (string 40 optional)",
+                        "example": "Daniel"
+                    },
+                    "user_lastname": {
+                        "type": "string",
+                        "description": "User lastname (string 40 optional)",
+                        "example": "Olivares"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "description": "User email (string 40 optional)",
+                        "example": "daniel.olivares@apitest.com"
+                    },
+                    "user_password": {
+                        "type": "string",
+                        "description": "User password (string 10 optional)",
+                        "example": "123456"
+                    },
+                    "user_birthday": {
+                        "type": "string",
+                        "description": "User birthday (string 6-50 optional)",
+                        "example": "example": "1981-07-15"
+                    },
+                    "user_sex": {
+                        "type": "int",
+                        "enum": [-1, 0, 1],      // 0 Female / 1 Male / -1 No Sp
+                        "description": "User gender (int optional)",
+                    },
+                    "user_locale": {
+                        "type": "string",
+                        "enum": ["ar", "bg", "ca", "de", "el", "en", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"],
+                        "description": "User locale (string optional)",
+                    }
+                },
+                "additionalProperties": false
+            }
+           
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + success       (boolean) - If success
+            + error         (string)  - If there is any error
+            + errorMessage  (string)  - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+
+### User activation                         [POST   /patient/activate]
+
+If a user was previously deactivated, this method will set it to activated. Users need to be activated to log in CogniFit. Activate a user is not allocating any license or program to that user.
+            
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+            
+### User deactivation                       [POST   /patient/deactivate]
+
+Allows to deactivate users and free their licenses. As long as users are deactivated, their cognitive 
+information can not be reached nor can they log in CogniFit.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+            
+### User grant training subscription        [POST   /subscription/set]
+
+Allows to activate monthly recurring subscriptions for users. User will have access to all training programs and all games. By default, the personalised training will be set as training program.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+
+### User cancel training subscription       [POST   /subscription/remove]
+
+Allows to deactivate monthly recurring subscriptions for users. User will have access until the end of his subscription period. After that subscription will not be renewed and user will not have anymore access to trainings and games.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+
+### User account deletion       [DELETE   /delete-user]
+
+Allows to delete user accounts. User data would be removed. User would not be able to access CogniFit anymore with this account. The partner would not be able to access user data. Partners are only able to delete accounts created by them.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true
+            }
+            
+### User list                         [POST   /get-users-list]
+
+Get the list of your active users with active training licenses and allocated assessment licenses.
+            
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "initial_value":0,
+                "total_points": 50
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "initial_value": {
+                        "type": "integer",
+                        "description": "Offset",
+                        "example": 0
+                    },
+                    "total_points": {
+                        "type": "integer",
+                        "description": "Total elements in page (50 Max)",
+                        "example": 50
+                    }
+                },
+                "additionalProperties": false
+            }
+
+
++ Response 201 (application/json)
+    
+    + Body
+
+            {
+                "morePages": false,
+                "userAccounts": [
+                    {
+                        "user_token": "1234567890qwertyuiopasdfghjkl",
+                        "user_email": "fake001@example.com",
+                        "user_name": "Joe",
+                        "user_lastname": "Doe",
+                        "user_birthday": "1981-07-15",
+                        "user_sex": 1,
+                        "user_locale": "en",
+                        "licenses": {
+                            "assessment": {
+                                "GENERAL_ASSESSMENT": {
+                                    "used": "0",
+                                    "unused": 1
+                                }
+                            },
+                            "training": {
+                                "active_renewal": 1,
+                                "expiration_date": "2021-06-12"
+                            }
+                        }
+                    },
+                    {
+                        "user_token": "1234567890qwertyuiopzxcvbnm",
+                        "user_email": "fake002@example.com",
+                        "user_name": "Marie",
+                        "user_lastname": "James",
+                        "user_birthday": "1941-01-29",
+                        "user_sex": 0,
+                        "user_locale": "en",
+                        "licenses": {
+                            "assessment": [],
+                            "training": {
+                                "active_renewal": 1,
+                                "expiration_date": "2021-06-12"
+                            }
+                        }
+                    },
+                    {
+                        "user_token": "1234567890qwertyuiopzxcvbnm",
+                        "user_email": "fake002@example.com",
+                        "user_name": "Martha",
+                        "user_lastname": "",
+                        "user_birthday": "1951-02-21",
+                        "user_sex": 0,
+                        "user_locale": "en",
+                        "licenses": {
+                            "assessment": [],
+                            "training": []
+                        }
+                    }
+                ]
+            }
+
+## Cognitive skills                    [/skills]        
+
+### Skills list                        [GET /skills{?client_id}{?locales%5b%5d*}]
+
+List of cognitive skills measured and trained by CogniFit.
+
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"FOCUS_ATTENTION",
+                    "assets": {
+                        "titles": {
+                            "en": "Focused Attention",
+                            "es": "Atención Focalizada",
+                            "fr": "Attention focalisée",
+                            ...
+                        },
+                        "descriptions": {
+                            "en": "Focus is the ability to sort different visual and auditory stimuli so as to prioritize actions. It often requires ignoring certain irrelevant information in order to successfully allocate attention to another. This ability is developed through the years and is action-specific.<br /><br /><b>Example:</b> One of the most interesting manifestations of this ability is \"The Cocktail Party effect\": have you ever stood in a room full of people chatting and suddenly noticed someone discussing your name. This ability to sort out certain information from other irrelevant ones is the ability to focus.",
+                            "es": "La atención focalizada es la capacidad para centrar nuestro foco atencional en un estímulo objetivo, independientemente del tiempo que dure dicha fijación. La atención focalizada nos permite detectar rápidamente estímulos relevantes, tanto externos, como internos.<br /><br /><b>Ejemplo:</b> Una de las manifestaciones más interesantes de esta capacidad es el efecto \"Cocktail Party\": ¿Alguna vez has estado en una habitación llena de gente hablando y de repente te has dado cuenta de que alguien mencionó tu nombre? Esta habilidad para distinguir cierta información relevante de otra que no lo es, es la atención focalizada.",
+                            "fr": "L'attention focalisée est la capacité à concentrer notre attention sur un stimulus objectif, quelle que soit la durée de cette fixation. Une attention ciblée nous permet de détecter rapidement un stimulus pertinent, tant externe qu'interne.<br /><br /><b>Exemple :</b> L'une des manifestations les plus intéressantes de cette capacité est l'effet \"Cocktail Party\" : avez-vous déjà été dans une salle pleine de gens qui parlent et avez soudain remarqué que quelqu'un a mentionné votre nom ? Cette capacité à distinguer certaines informations pertinentes de celles qui ne le sont pas, c'est l'attention focalisée.",
+                            ...
+                        },
+                        "images": {
+                            "whiteIcon": "https://dcmc7jx5auk5b.cloudfront.net/img/v2/skills/white/FOCUS_ATTENTION.png",
+                            "transparentIcon": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/skills/zodiacicon1_FOCUS_ATTENTION"
+                        }
+                    }
+                },
+                ...
+            ]
+
+## Cognitive assessments                    [/programs/assessments]        
+
+### Assessments list                        [GET /programs/assessments{?client_id}{?locales%5b%5d*}]
+
+List of allowed assessment keys to use when setting a program.
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"GENERAL_ASSESSMENT",
+                    "skills": [
+                        "AUDITORY_PERCEPTION",
+                        "AUDITORY_SHORT_TERM_MEMORY",
+                        ...,
+                        "WORKING_MEMORY"
+                    ],
+                    "assets": {
+                        "titles": {
+                            "en": "General Cognitive Assessment (CAB)",
+                            "fr": "Évaluation cognitive générale (CAB)",
+                            "pt_BR": "Avaliação Cognitiva Geral (CAB)",
+                            ...
+                        },
+                        "descriptions": {
+                            "en": "The General Cognitive Assessment is a complete battery made up of neuropsychological tests that were designed to assess the cognitive profile of users with and without pathologies. It allows the user to identify possible cognitive deficits and detect possible cognitive deterioration. The assessment is made up of 22 tasks that measure a total of 21 cognitive skills, which are the following: Working memory, short-term memory, naming, visual memory, short-term auditory memory, contextual memory, divided attention, focus, inhibition, updating, spatial perception, field of vision, recognition, visual scanning, visual perception, estimation, hand-eye coordination, response time, processing speed, planning, and shifting.",
+                            "fr": "L'évaluation cognitive générale est une batterie complète de tests neurocognitifs qui a été conçue pour évaluer le profil cognitif de l'utilisateur avec ou sans pathologies. Elle permet d'identifier les possibles déficits cognitifs et détecter le niveau de détérioration de chacun d'entre eux. Elle est composée de 22 tâches qui mesurent un total de 21 habiletés cognitives : la mémoire de travail, la mémoire à court-terme, la dénomination, la mémoire visuelle, la mémoire auditive à court-terme, la mémoire contextuelle, l'attention partagée, l'attention, l'inhibition, l'actualisation, la perception spatiale, le champ visuel, la reconnaissance, le balayage visuel, la perception visuelle, l'estimation, la coordination oeil-main, le temps de réaction, la vitesse de traitement, la planification et la recontextualisation.",
+                            "pt_BR": "A avaliação cognitiva geral é uma bateria de testes neuropsicológicos completa, desenhados para avaliar o perfil cognitivo de usuários que apresentam ou não patologias. Permite ao usuário identificar possíveis déficits cognitivos e detectar possíveis deteriorações cognitivas. O teste está composto por 22 tarefas que medem um total de 21 habilidades cognitivas, tais como a memória operacional, memória de curto prazo, nomeação, memória visual, memória auditiva de curto prazo, memória contextual, atenção dividida, concentração, inibição, atualização, percepção espacial, campo de visão, identificação, exploração visual, percepção visual, estimativa, coordenação óculo-manual, tempo de resposta, velocidade de processamento, planejamento e deslocamento."
+                            ...
+                        },
+                        "images": {
+                            "scareIconZodiac": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/assessment/prod_101_icon_x36ari"
+                        }
+                    },
+                    "estimatedTime": 1265,
+                    "tasks": [
+                        "THE_BLUE_SHAPE",
+                        ...
+                        "THE_BALL_AND_THE_COLORS"
+                    ],
+                    "availableQuantity":2   // If applicable
+                },
+                ...
+            ]
+  
+ 
+### Single Task Assessments list                        [GET /programs/assessment-tasks{?client_id}{?locales%5b%5d*}]
+
+List of allowed assessment keys to use when setting a program.
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"THE_NUMBERS_TASK_ASSESSMENT",
+                    "skills": [
+                        "AUDITORY_SHORT_TERM_MEMORY",
+                        "PROCESSING_SPEED",
+                        ...,
+                        "WORKING_MEMORY"
+                    ],
+                    "assets": {
+                        "titles": {
+                            "en": "WOM-ASM: Sequencing Test",
+                            "fr": "WOM-ASM: Test de séquençage",
+                            "pt_BR": "WOM-ASM: teste de sequenciamento",
+                            ...
+                        },
+                        "descriptions": {
+                            "en": "The WOM-ASM Sequencing Test is based on the classic direct and indirect digit test of the WAIS-III (Wechsler, 1997). Through this task we can test the user's ability to retain in the short term phonological information presented visually.",
+                            "fr": "Le test de séquençage WOM-ASM est basé sur le test classique des chiffres directs et indirects du WAIS-III (Wechsler, 1997). Grâce à cette tâche, nous pouvons tester la capacité de l'utilisateur à retenir à court terme les informations phonologiques présentées  de manière visuelle.",
+                            "pt_BR": "O teste de sequenciamento WOM-ASM é baseado no clássico teste de dígitos diretos e indiretos da escala WAIS-III (Wechsler, 1997). Por meio desta tarefa podemos testar a capacidade do usuário de reter a curto prazo as informações fonológicas apresentadas visualmente."
+                            ...
+                        },
+                        "images": {
+                            "scareIconZodiac": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/assessment/prod_101_icon_x36ari"
+                        }
+                    },
+                    "estimatedTime": 170,
+                    "tasks": [
+                        "THE_NUMBERS"
+                    ]
+                },
+                ...
+            ]
+  
+ 
+### Questionnaires list                        [GET /programs/questionnaires{?client_id}{?locales%5b%5d*}]
+
+List of allowed questionnaire keys to use when setting a program.
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"BIST2_QUESTIONNAIRE_ASSESSMENT",
+                    "skills": [],
+                    "assets": {
+                        "titles": {
+                            "en": "BIST2",
+                            "fr": "BIST2",
+                            "pt_BR": "BIST2",
+                            ...
+                        },
+                        "descriptions": {
+                            "en": "The BIST-2 is a questionnaire to identify the self-perceived risk of Traumatic Brain Injury.It is composed of 17 questions related to symptoms associated with Traumatic Brain Injury.The response alternatives for each question consist of a scale from 0 to 10, in which the user has to indicate to what degree they have experienced symptoms, from \"not at all\" (0) to \"Severe\" (10), compared with before the accident.Depending on the score obtained from the set of responses, a result of TBI risk will be obtained: \"Low TBI risk\", and \"High TBI risk\".",
+                            "fr": "Le BIST-2 est un questionnaire visant à identifier le risque auto-perçu de traumatisme crânien. Il est composé de 17 questions liées aux symptômes associés aux traumatismes crâniens. Les alternatives de réponse pour chaque question consistent en une échelle de 0 à 10, dans laquelle l'utilisateur doit indiquer dans quelle mesure il a ressenti des symptômes, de « pas du tout » (0) à « grave » (10), par rapport à avant. l'accident. En fonction du score obtenu à partir de l'ensemble des réponses, un résultat de risque de TBI sera obtenu : « Risque de TBI faible » et « Risque de TBI élevé ».",
+                            "pt_BR": "O BIST-2 é um questionário para identificar o risco autopercebido de Traumatismo Cranioencefálico. É composto por 17 questões relacionadas aos sintomas associados ao Traumatismo Cranioencefálico. As alternativas de resposta para cada questão consistem em uma escala de 0 a 10, na qual o usuário deve indicar em que grau apresentou sintomas, de “nenhum” (0) a “grave” (10), em comparação com antes. o acidente. Dependendo da pontuação obtida no conjunto de respostas, será obtido um resultado de risco de TCE: “Baixo risco de TCE” e “Alto risco de TCE”."
+                            ...
+                        },
+                        "images": {
+                            "scareIconZodiac": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/assessment/prod_101_icon_x36ari"
+                        }
+                    },
+                    "estimatedTime": 0,
+                    "tasks": []
+                },
+                ...
+            ]
+  
+ 
+## Brain training Programs                  [/programs/trainings]
+
+### Training list                           [GET /programs/trainings{?client_id}{?locales%5b%5d*}]
+
+List of allowed training keys to use when setting a training program.
+
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+    
+
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"OVER_55",                        // training key
+                    "name":"55 and Over Brain Training",    // training name
+                    "iphone":1,                             // iPhone availability
+                    "ipad":1,                               // iPad availability
+                    "android": 0                            // Android availability
+                    "skills": [
+                        "SHORT_TERM_MEMORY",
+                        "VISUAL_SHORT_TERM_MEMORY",
+                        "VISUAL_MEMORY"
+                    ],
+                    "tasks": [
+                        "SNAKE",
+                        "WATER_LILIES",
+                        "JIGSAW_9",
+                        "WORD_QUEST"
+                    ],
+                    "assets": {
+                        "titles": {
+                            "en": "55 and Over Brain Training",
+                            "es": "Entrenamiento para mayores de 55 años"
+                        },
+                        "descriptions": {
+                            "en": "Stimulate, train, and rehabilitate brain function in adults, seniors, and the elderly. Online materials, exercises, and brain games designed to maintain cognitive health, prevent dependency, and healthy active aging.",
+                            "es": "Estimular, entrenar y rehabilitar la función cerebral en adultos, personas mayores y ancianos. Materiales, ejercicios y juegos mentales online especializados en el mantenimiento cognitivo, prevención de la dependencia, y envejecimiento activo y saludable."
+                        },
+                        "images": {
+                            "scareIconZodiac": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/training/377_6_oAYwXK"
+                        }
+                    }
+                }
+                ...
+            ]
+    
+
+## Brain Games                              [/programs/tasks]
+
+### Brain Game list                         [GET /programs/tasks{?client_id}{?locales%5b%5d*}{?category}]
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+    + locales%5b%5d: en (Any of the listed once or none for English ["en", "ar", "ca", "de", "el", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"])    
+    + category: COGNITIVE (["COGNITIVE", "MATH", "LANG"] Defualt is COGNITIVE)
+
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key":"BEE_BALLOON",    // task key
+                    "iphone":1,             // iPhone availability
+                    "ipad":1,               // iPad availability
+                    "android": 0,            // Android availability
+                    "skills": [
+                        "EYE_HAND_COORDINATION",
+                        "SHIFTING",
+                        "RESPONSE_TIME"
+                    ],
+                    "assets": {
+                        "titles": {
+                            "en": "Bee Balloon",
+                            "fr": "Abeille Ballon"
+                        },
+                        "descriptions": {
+                            "en": "The objective of this game is to explode all the balloons that appear on the screen.",
+                            "fr": "Votre objectif : exploser tous les ballons qui apparaissent à l'écran."
+                        },
+                        "images": {
+                            "icon": "https://s3.amazonaws.com/dynamicimages.cognifit.com/storage/cognifit/games/41/ScareIconZodiac"
+                        }
+                    }
+                },
+                ...
+            ]
+
+
+## Set training program                     [/set-training-program]
+
+### Login & Launch                          [GET /partner/{client_hash}{?client_id,user_token,callback_url,setting}]
+
+> **Endpoint domain**: After obtaining a user access token, it must be used before it expires in request: 
+1. To the partner landing page in CogniFit: https://www.cognifit.com/partner/{client_url_hash}
+2. To CogniFit app using the schema: CognifitPartner://login
+
+> **Parameters**: the domain of this endpoint is www.cognifit.com<br/>
+    1. client_id<br/>
+    2. client_hash<br/>
+    3. user_token (access token)<br/>
+    4. callback_url<br/>
+    5. settings
+    
+> **Response**: Users will do every set task and will be redirected back to partner callback with the following parameters:
+    + status            = “completed”, “aborted” or “loginError”
+    + tasks             List of tasks to do
+    + tasksDone         List of tasks done    
+    + trainings         List of trainings to do
+    + trainingsDone     List of trainings done
+    + assessments       List of assessments to do
+    + assessmentsDone   List of assessments done
+    + user_token        
+
++ Parameters
+    + client_id:        906354cf409c859a01053e29effc283ffc283fdr                    - (string 40)
+    + client_hash:      yrwnlewEy5BfpBBgLcOtD32ieZF5QPq7DgdZKBSH7A9bPsCOirXmeqeU5vP - (string 64)
+    + user_token:       UDDmUN9talZhUeWDZy0gufpGYif0aimwH8SjZTqj                    - (string 40) 
+    + callback_url:     https://partner.domain.example/callback                     - (string 40) 
+    + setting:          [0][type]=task&setting[0][key]=MAHJONG&setting[1][type]=assessment&setting[1][key]=TDHA+Assessment - (array of elements)
+                        [
+                            {
+                                "type":"task",
+                                "key":"MAHJONG"
+                            },
+                            {
+                                "type":"assessment",
+                                "key":"TDHA_Assessment"
+                            }
+                        ]
+                                                    
+
++ Response 201 (text/html; charset=UTF-8)
+
+
+## Set tasks program                        [/set-tasks-program]
+
+### Login & Launch                          [GET /partner/{client_hash}{?client_id,user_token,callback_url,setting}]
+
+> **Endpoint domain**: After obtaining a user access token, it must be used before it expires in request: 
+1. To the partner landing page in CogniFit: https://www.cognifit.com/partner/{client_hash}
+2. To CogniFit app using the schema: CognifitPartner://login
+
+> **Parameters**: the domain of this endpoint is www.cognifit.com<br/>
+    1. client_id<br/>
+    2. client_hash<br/>
+    3. user_token (access token)<br/>
+    4. callback_url<br/>
+    5. settings
+    
+> **Response**: User will do every set task and will be redirect back to partner callback with the following parameters:
+    + status            = “completed”, “aborted” or “loginError”
+    + tasks             List of tasks to do
+    + tasksDone         List of tasks done    
+    + trainings         List of trainings to do
+    + trainingsDone     List of trainings done
+    + assessments       List of assessments to do
+    + assessmentsDone   List of assessments done
+    + user_token        
+
++ Parameters
+    + client_id:        906354cf409c859a01053e29effc283ffc283fdr                    - (string 40)
+    + client_hash:      yrwnlewEy5BfpBBgLcOtD32ieZF5QPq7DgdZKBSH7A9bPsCOirXmeqeU5vP - (string 64)
+    + user_token:       UDDmUN9talZhUeWDZy0gufpGYif0aimwH8SjZTqj                    - (string 40) 
+    + callback_url:     https://partner.domain.example/callback                     - (string 40) 
+    + setting:          {
+                            "tasks": [
+                                        "MAHJONG", 
+                                        "MAHJONG"
+                                    ]
+                        }   - (array of elements)
+                        example: setting%5Btasks%5D%5B%5D=MAHJONG&setting%5Btasks%5D%5B%5D=MAHJONG
+                                                    
+
++ Response 201 (text/html; charset=UTF-8)
+            
+## Activity and evolution report  [/get-historical-score-and-skills]
+
+### Get Historical Skills                   [POST /get-historical-score-and-skills]
+
+Return the skill evolution of the user sorted from most recent to least recent. Skill scores are updated after each training session or assessment. 
+
+This method could be used to show to a user his cognitive historical but it is not build for batch downloading actions.
+
+If the optional parameter session_id is set, only that session will be returned.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "initial_value":"0",
+                "total_points":"50",
+                "session_id": "2"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "initial_value": {
+                        "type": "number",
+                        "description": "Initial value for pagination (int optional min 0 default 0)",
+                        "example": 0
+                    },
+                    "total_points": {
+                        "type": "number",
+                        "description": "Total points for pagination (int optional max 50)",
+                        "example": 50
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Session id to retrieve (int optional)",
+                        "example": 2
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + success                   (boolean)- If success
+            + historicalScoreAndSkills  (object) - If success
+            + baseScore                 (integer)- If success 100 or 800
+            + error                     (string) - If there is any error
+            + errorMessage              (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true,
+                "historicalScoreAndSkills":[
+                    {
+                        "sessionId": 2,
+                        "date": "2016-08-31 10:11:01",
+                        "typeKey":"NORMAL",
+                        "type":"TRAINING",
+                        "score":342,
+                        "cognitiveAge": {
+                            "age": 42,
+                            "precision": "ABOVE"
+                        },
+                        "skills":[
+                                    {"key":"AUDITORY_PERCEPTION","value":"396"},
+                                    {"key":"AUDITORY_SHORT_TERM_MEMORY","value":"412"},
+                                    ...
+                                    {"key":"WORKING_MEMORY","value":"393"}
+                        ],
+                        "categories": [
+                                    {
+                                        "key": "REASONING",
+                                        "value": "372"
+                                    },
+                                    {
+                                        "key": "MEMORY",
+                                        "value": "345"
+                                    },
+                                    {
+                                        "key": "ATTENTION",
+                                        "value": "343"
+                                    },
+                                    {
+                                        "key": "MOTOR",
+                                        "value": "258"
+                                    },
+                                    {
+                                        "key": "PERCEPTION",
+                                        "value": "417"
+                                    }
+                        ],
+                    },
+                    {
+                        "sessionId": 1,
+                        "date": "2016-08-29 10:11:01",
+                        "typeKey":"DYSLEXIA_ASSESSMENT",
+                        "type":"ASSESSMENT",
+                        "score":342,
+                        "cognitiveAge": {
+                            "age": 42,
+                            "precision": "ABOVE"
+                        },
+                        "skills":[
+                                    {"key":"AUDITORY_PERCEPTION","value":"396"},
+                                    {"key":"AUDITORY_SHORT_TERM_MEMORY","value":"412"},
+                                    ...
+                                    {"key":"WORKING_MEMORY","value":"393"}
+                        ],
+                        "categories": [
+                                    {
+                                        "key": "REASONING",
+                                        "value": "372"
+                                    },
+                                    {
+                                        "key": "MEMORY",
+                                        "value": "345"
+                                    },
+                                    {
+                                        "key": "ATTENTION",
+                                        "value": "343"
+                                    },
+                                    {
+                                        "key": "MOTOR",
+                                        "value": "258"
+                                    },
+                                    {
+                                        "key": "PERCEPTION",
+                                        "value": "417"
+                                    }
+                        ],
+                        "questionsAndAnswers": {
+                            "ASMNT_QUEST_RIGHT_HANDED": "YES",
+                            "ASMNT_QUEST_TABLET_KEYBOARD": "NO",
+                            "ASMNT_QUEST_DYSLEXIA_DIAGNOSIS": "NO",
+                            ...
+                            "ASMNT_QUEST_DIFFICULTIES_PLANING_TIME": "NO"
+                        }
+                    },
+                    ...
+                    {...}
+                ],
+                "baseScore": 800
+            }
+           
+### Get Historical Played Games             [POST /get-historical-played-games]
+
+Return the skill evolution of the user sorted from most recent to least recent. Skill scores are updated after each training session or assessment. 
+
+This method could be used to show to a user his played game historical but it is not build for batch downloading actions.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "initial_value":"0",
+                "total_points":"50"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "initial_value": {
+                        "type": "number",
+                        "description": "Initial value for pagination (int optional min 0 default 0)",
+                        "example": 0
+                    },
+                    "total_points": {
+                        "type": "number",
+                        "description": "Total points for pagination (int optional max 50)",
+                        "example": 50
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + success                   (boolean)- If success
+            + historicalScoreAndSkills  (object) - If success
+            + error                     (string) - If there is any error
+            + errorMessage              (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true,
+                "historicalScoreAndSkills":[
+                    {
+                        "key": "NEON_LIGHTS",
+                        "level": 1,
+                        "sublevel": 2,
+                        "score": 140,
+                        "timePlayed": 184,
+                        "time": "2016-08-29 11:11:01",
+                        "outReasonKey": "",
+                        "type": "NOT_TRAINING"
+                    },
+                    {
+                        "key": "NEON_LIGHTS",
+                        "level": 2,
+                        "sublevel": 5,
+                        "score": 183,
+                        "timePlayed": 123,
+                        "time": "2016-08-27 10:15:01",
+                        "outReasonKey": "",
+                        "type": "TRAINING"
+                    },
+                    {
+                        "key": "SPACE_RESCUE",
+                        "level": 1,
+                        "sublevel": 2,
+                        "score": 140,
+                        "timePlayed": 184,
+                        "time": "2016-08-26 12:54:56",
+                        "outReasonKey": "",
+                        "type": "TRAINING"
+                    },
+                    ...
+                    {...}
+                ]
+            }
+           
+### Get Assessment values                   [POST /user-info/get-assessment-values]
+
+Return the assessment values calculated for the user after an assessment session. 
+
+This method could be used to show to a user his cognitive historical but it is not build for batch downloading actions.
+
+The session_id parameter must be an assessment session.
+
+**Assessment indicators**: There are three different indicators data types. They would help to understand the assessmentIndicators values.<br/>
+
+WELLNESS: This indicator is placing the user values into poor or optimal wellness ranges.
+    
+```json
+{
+    "interpretation": {
+        "dataType": "WELLNESS",
+        "description": {
+            "POOR_WELLNESS_RANGE": [
+                0,
+                "minRange"
+            ],
+            "OPTIMAL_WELLNESS_RANGE": [
+                "medRange",
+                "maxRange"
+            ]
+        }
+    },
+    "values": [...]
+}
+```
+        
+FLIPPED_RISK: This indicator is placing the user values into high or optimal risk ranges.
+
+```json
+{
+    "interpretation": {
+        "dataType": "FLIPPED_RISK",
+        "description": {
+            "HIGH_RISK_RANGE": [
+                0,
+                "minRange"
+            ],
+            "OPTIMAL_RISK_RANGE": [
+                "medRange",
+                "maxRange"
+            ]
+        }
+    },
+    "values": [...]
+}
+```
+
+RISK: This indicator is placing the user values into no dectectable risk or high risk ranges.
+   
+```json
+{
+    "interpretation": {
+        "dataType": "RISK",
+        "description": {
+            "NO_DETECTABLE_RISK_RANGE": [
+                0,
+                "minRange"
+            ],
+            "HIGH_RISK_RANGE": [
+                "medRange",
+                "maxRange"
+            ]
+        }
+    },
+    "values": [...]
+}
+```        
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "session_id": "2"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Session id to retrieve (int optional)",
+                        "example": 2
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + success                   (boolean)- If success
+            + assessmentValues          (object) - If success
+            + baseScore                 (integer)- If success 100 or 800
+            + error                     (string) - If there is any error
+            + errorMessage              (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true,
+                "assessmentValues":[
+                    "sessionId": 2,
+                    "date": "2016-08-31 10:11:01",
+                    "key":"GENERAL",
+                    "type":"ASSESSMENT",
+                    "score":342,
+                    "skills":[
+                        {"key":"AUDITORY_PERCEPTION","value":"396"},
+                        {"key":"AUDITORY_SHORT_TERM_MEMORY","value":"412"},
+                        ...
+                        {"key":"WORKING_MEMORY","value":"393"}
+                    ],
+                    "categories": [
+                        {
+                            "key": "REASONING",
+                            "value": "372"
+                        },
+                        {
+                            "key": "MEMORY",
+                            "value": "345"
+                        },
+                        {
+                            "key": "ATTENTION",
+                            "value": "343"
+                        },
+                        {
+                            "key": "MOTOR",
+                            "value": "258"
+                        },
+                        {
+                            "key": "PERCEPTION",
+                            "value": "417"
+                        }
+                    ],
+                    "assessmentIndicators": {
+                        "interpretation": {
+                            "dataType": "RISK",
+                            "description": {
+                                "NO_DETECTABLE_RISK_RANGE": [
+                                    0,
+                                    "minRange"
+                                ],
+                                "HIGH_RISK_RANGE": [
+                                    "medRange",
+                                    "maxRange"
+                                ]
+                            }
+                        },
+                        "values": [
+                            {
+                                "areaKey": "COGNITIVE_PROFILE",
+                                "value": 1,
+                                "minRange": 2,
+                                "medRange": 5,
+                                "maxRange": 10
+                            },
+                            {
+                                "areaKey": "MOTOR_SKILLS",
+                                "value": 3,
+                                "minRange": 1,
+                                "medRange": 4,
+                                "maxRange": 6
+                            },
+                            {
+                                "areaKey": "LANGUAGE",
+                                "value": 3,
+                                "minRange": 2,
+                                "medRange": 4,
+                                "maxRange": 6
+                            },
+                            {
+                                "areaKey": "MENTAL_STATE",
+                                "value": 0,
+                                "minRange": 4,
+                                "medRange": 6,
+                                "maxRange": 14
+                            },
+                            {
+                                "areaKey": "SLEEP",
+                                "value": 1,
+                                "minRange": 1,
+                                "medRange": 2,
+                                "maxRange": 3
+                            }
+                        ]
+                    }
+                },
+                "baseScore": 800
+            }
+
+### Get Assessment Report files [POST /user-info/get-assessment-report]
+
+Return the assessment report or assessment reports created after a user assessment session.
+
+On success pdf file or zip file with pfd files will be returned. 
+If the reports are being built and they are not an error 1601 will be returned. Repeat the request after a moment.
+    
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+            
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "session_id":1,
+                "locale":"en",
+                "report_types": ["ASSESSMENT_REPORT", "COGNITIVE_PROFILE", "CARE_PLAN"]
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Session id when the assessment was completed. It can be found in the Get Historical Skills method.",
+                        "example": 1
+                    },
+                    "locale": {
+                        "type": "string",
+                        "description": "Optional parameter, by default uses the locale of the main account. If you want to use the locale of the user account set to 'user_locale'.",
+                        "example": "en"
+                    },
+                    "report_types": {
+                        "report_types": "string list",
+                        "optional": true,
+                        "description": "List of assessment report types to be returned. If the parameter is not present all reports will be returned. General assessment and Over55 assessment create 3 assessment report type (ASSESSMENT_REPORT, COGNITIVE_PROFILE & CARE_PLAN). Other asssessments create ASSESSMENT_REPORT.",
+                        "example": 1
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json|application/pdf|application/zip)
+
+
+### Get Assessment Report urls [POST /user-info/get-assessment-report-url]
+
+Return the assessment report url or assessment report urls created after a user assessment session.
+
+If the reports are being built and they are not an error 1601 will be returned. Repeat the request after a moment.
+    
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+            
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "session_id":1,
+                "locale":"en"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Session id when the assessment was completed. It can be found in the Get Historical Skills method.",
+                        "example": 1
+                    },
+                    "locale": {
+                        "type": "string",
+                        "description": "Optional parameter, by default uses the locale of the main account. If you want to use the locale of the user account set to 'user_locale'.",
+                        "example": 1
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+
+    + Body
+
+            {
+                "success": true,
+                "reportUrls": [
+                    "https://s3.amazonaws.com/static.cognifit.com/customersupport/Validation+for+Researchers.pdf"
+                ]
+            }
+
+
+### Get Assessment Report urls with metadata [POST /user-info/get-assessment-report-url-with-metadata]
+
+Return the assessment report url or assessment report urls created after a user assessment session.
+
+If the reports are being built and they are not an error 1601 will be returned. Repeat the request after a moment.
+    
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+            
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "session_id":1,
+                "locale":"en"
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "session_id": {
+                        "type": "number",
+                        "description": "Session id when the assessment was completed. It can be found in the Get Historical Skills method.",
+                        "example": 1
+                    },
+                    "locale": {
+                        "type": "string",
+                        "description": "Optional parameter, by default uses the locale of the main account. If you want to use the locale of the user account set to 'user_locale'.",
+                        "example": 1
+                    },
+                }
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+
+    + Body
+
+            {
+                "success": true,
+                "reportUrls": [
+                    {
+                        "reportUrl":"https://s3.amazonaws.com/static.cognifit.com/reports/cab/en.pdf",
+                        "reportType":"ASSESSMENT_REPORT" // ASSESSMENT_REPORT, COGNITIVE_PROFILE, CARE_PLAN
+                        "reportDate":1698080096
+                    }
+                ]
+            }
+
+
+## Academic Research  [/programs/studies]
+
+It is possible to have an API account while being a researcher. This allows researchers to use the API to create participants for their studies. 
+
+Follow <a href="https://support.cognifit.com/s/article/how-to-manage-studies-and-participants-from-a-researcher-account-through-the-API?language=en_US">this link</a> to learn how to configure this option.
+
+### Get Researcher Studies [GET /programs/studies{?client_id}]
+
+Return the studies created by the researcher account in the CogniFit Academic Research Platform.
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
++ Parameters
+    + client_id: 906354cf409c859a01053e29effc283ffc283fdr - (string 40)
+
+
+            
++ Response 201 (application/json)
+    
+    + Body
+
+            [
+                {
+                    "key": 1,
+                    "status": "STARTED",
+                    "name": "Study A",
+                    "expectedParticipants": 150,
+                    "availableQuantity": 149
+                },
+                {
+                    "key": 2,
+                    "status": "STARTED",
+                    "name": "Study B",
+                    "expectedParticipants": 150,
+                    "availableQuantity": 150
+                }
+            ]
+           
+### Associate Participant To Study  [POST /user-programs/study/add]
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_token":"Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA==",
+                "study_id":1
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_token": {
+                        "type": "string",
+                        "description": "User token",
+                        "example": "Bt91wyUfzSzxoWZEz+0TgmzR2otn4Rqk2xBPHiXFZAtLlya0DnT7F1QK44zvB+Pf3ZrhwyVCdOMKm1xZQEGWOA=="
+                    },
+                    "study_id": {
+                        "type": "number",
+                        "description": "Study ID from GET /programs/studies method",
+                        "example": 0
+                    }
+                },
+                "additionalProperties": false
+            }
+
+            
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + success                   (boolean)- If success
+            + error                     (string) - If there is any error
+            + errorMessage              (string) - If there is any error
+    
+    + Body
+
+            {
+                "success": true,
+            }
+           
+
+## Associates registration                  [/registration/new-associate/register]
+
+It is possible, through the API, to create client accounts under the main client account. This process will generate distinct credentials for each client account. 
+
+You can then make requests to every endpoint with the main credentials and add an extra parameter in the body called 'alternative_identity.' All requests made will be consolidated under the main client account. 
+
+You must request <a href="mailto:integration@cognifit.com">integration@cognifit.com</a> to enable this functionality for your account.
+
+### Create new associate account                 [POST   /registration/new-associate/register]
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "clinic_name": "Associate Center Name",
+                "user_name": "Associate Contact Name",
+                "user_email": "daniel.olivares@apitestassociate.com",
+                "user_password": "123456" 
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "clinic_name": {
+                        "type": "string",
+                        "description": "Associate Center Name (string 40)",
+                        "example": "Daniel"
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "Associate Contact Name (string 40)",
+                        "example": "Daniel"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "description": "User email (string 40)",
+                        "example": "daniel.olivares@apitestassociate.com"
+                    },
+                    "user_password": {
+                        "type": "string",
+                        "description": "User password (string 10)",
+                        "example": "123456"
+                    }
+                },
+                "additionalProperties": false
+            }
+           
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + clientId      (string) - If success
+            + clientSecret  (string) - If success
+            + clientHash    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "user_token": "S9eMeqWACeGBTSd8GeVFhsiKNM89JduECqeJdnqrRKOApUKsieskwH5iuVXP/xxIoR6TtwbaLEwUzVctO095+w==",
+                "clientId": "65rd45td551f11577140f530fef924b20cdb0000",
+                "clientSecret": "93ce13dd551f11577140f530fef924b20cdb0000",
+                "clientHash": "heETFZ3Hn7lDfP0ElemTh2cAdBzeJyYlfNVruIYbsFozP7Ubh13QNhb30000"
+            }
+
+## User registration with alternative identity          [/registration?]
+
+### Create new user account with alternative identity   [POST   /registration]
+
++ Request
+
+    + Headers
+        
+            Content-Type: application/json;
+            cache-control: no-cache;
+
+    + Body
+
+            {
+                "client_id":"906354cf409c859a01053e29effc283ffc283fdr",
+                "client_secret":"93ce13dd551f11577140f530fef924b20cdbc653",
+                "user_name":"Daniel",
+                "user_lastname":"Olivares",
+                "user_email":"daniel.olivares@apitest.com",
+                "user_password":"123456",
+                "user_birthday":"1981-07-15",
+                "user_sex":1,
+                "user_locale":"en",
+                "alternative_identity": {
+                    "client_id": "65rd45td551f11577140f530fef924b20cdb0000",
+                    "client_secret": "93ce13dd551f11577140f530fef924b20cdb0000"
+                }
+            }
+
+    + Schema
+
+            {
+                "type": "object",
+                "properties": {
+                    "client_id": {
+                        "type": "string",
+                        "description": "Client ID",
+                        "example": "906354cf409c859a01053e29effc283ffc283fdr"
+                    },
+                    "client_secret": {
+                        "type": "string",
+                        "description": "Client Secret",
+                        "example": "93ce13dd551f11577140f530fef924b20cdbc653"
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "User name (string 40)",
+                        "example": "Daniel"
+                    },
+                    "user_lastname": {
+                        "type": "string",
+                        "description": "User lastname (string 40)",
+                        "optional": true,
+                        "example": "Olivares"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "description": "User email (string 40)",
+                        "example": "daniel.olivares@apitest.com"
+                    },
+                    "user_password": {
+                        "type": "string",
+                        "description": "User password (string 10)",
+                        "example": "123456"
+                    },
+                    "user_birthday": {
+                        "type": "string",
+                        "description": "User birthday (string 6-50)",
+                        "example": "example": "1981-07-15"
+                    },
+                    "user_sex": {
+                        "type": "int",
+                        "enum": [0, 1],      // 0 Female / 1 Male
+                        "optional": true
+                    },
+                    "user_locale": {
+                        "type": "string",
+                        "enum": ["ar", "bg", "ca", "de", "el", "en", "es", "fr", "he", "it", "ja", "ko_KR", "nl", "pl", "pt_BR", "pt_PT", "ru", "sr", "tr", "zh_CN"],
+                        "optional": true
+                    }
+                },
+                "additionalProperties": false
+            }
+           
+
++ Response 201 (application/json)
+    
+    + Body Attributes
+
+            + user_token    (string) - If success
+            + error         (string) - If there is any error
+            + errorMessage  (string) - If there is any error
+    
+    + Body
+
+            {
+                "user_token": "ca8a46fa6111a212d907fcc9baa1feff"
+            }
+
+           
+## Error messages                           [/errors]
+
+### Get Errors                              [GET   /errors]
+
+List of codes errors and message errors the application can throw.
+
++ Response 201 (application/json)
+    
+    + Body
+
+            {
+                "1100": "Incorrect data",
+                "1101": "Incorrect user name",
+                "1102": "Incorrect user lastname",
+                "1103": "Incorrect user password",
+                "1104": "Incorrect date",
+                "1105": "Incorrect user email",
+                "1106": "Incorrect user locale",
+                "1120": "Email already exists",
+                "1130": "Client no registered",
+                "1140": "User blocked",
+                "1150": "Deactivated user",
+                "1230": "Missing parameters",
+                "1310": "No active subscription",
+                "1311": "Other subscription already exists",
+                "1312": "User has a market subscription",
+                "1401": "User already active",
+                "1402": "User has no relation with you. Please use /registration endpoint",
+                "1403": "User already deactivated",
+                "1404": "User not removable by this client",
+                "1501": "Partner allowed",
+                "2000": "Not enough licenses"
+            }
+            
