@@ -20,7 +20,6 @@ Para empezar con CogniFit API, necesitas:
    - Investigación
 
 ### 2. Variables de Entorno
-
 Crear un archivo `.env.local` con las siguientes variables:
 
 ```bash
