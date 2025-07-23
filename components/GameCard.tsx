@@ -5,6 +5,7 @@ interface GameCardProps {
   game: CogniFitGame;
   skills?: CogniFitSkill[]; // Para mostrar nombres de habilidades en español
   onPlayGame?: (gameKey: string) => void;
+  onViewDescription?: (game: CogniFitGame) => void;
   locale?: string;
 }
 
@@ -12,6 +13,7 @@ export default function GameCard({
   game,
   skills = [],
   onPlayGame,
+  onViewDescription,
   locale = "es",
 }: GameCardProps) {
   // Obtener el título y descripción en el idioma preferido
@@ -109,9 +111,27 @@ export default function GameCard({
 
       {/* Body */}
       <div className="px-4 py-4 flex-grow">
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {description}
-        </p>
+        <div className="mb-4">
+          <p 
+            className="text-sm text-gray-600 dark:text-gray-400 mb-2"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 4,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {description}
+          </p>
+          {description && description.length > 150 && (
+            <button
+              onClick={() => onViewDescription?.(game)}
+              className="text-blue-600 dark:text-blue-400 text-xs font-medium hover:underline"
+            >
+              Ver más...
+            </button>
+          )}
+        </div>
 
         <div className="mb-4">
           <p className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
