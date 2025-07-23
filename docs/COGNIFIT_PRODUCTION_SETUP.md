@@ -17,7 +17,6 @@
 ☎️ Soporte General: https://www.cognifit.com/contact
 💼 Ventas Empresariales: sales@cognifit.com
 ```
-
 ### **Información a enviar:**
 ```text
 Asunto: Solicitud de Autorización de Dominio - SDK JavaScript
