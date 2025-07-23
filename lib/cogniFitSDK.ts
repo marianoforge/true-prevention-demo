@@ -1,4 +1,8 @@
-import { GameLaunchParams, GameCompletionResponse, CogniFitSDKConfig } from "@/types";
+import {
+  GameLaunchParams,
+  GameCompletionResponse,
+  CogniFitSDKConfig,
+} from "@/types";
 
 // Declarar el objeto global HTML5JS que proporciona CogniFit
 declare global {
@@ -26,7 +30,7 @@ export class CogniFitSDK {
 
   constructor() {
     // Solo configurar en el cliente
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Escuchar mensajes del juego
       this.setupMessageListener();
       // Inicializar el launcher oficial
@@ -41,9 +45,9 @@ export class CogniFitSDK {
     try {
       // Solo necesitamos preparar para usar la API directa
       this.launcher = true; // Marcador de que está listo
-      console.log('✅ Componentes para juegos reales inicializados');
+      console.log("✅ Componentes para juegos reales inicializados");
     } catch (error) {
-      console.error('❌ Error inicializando componentes:', error);
+      console.error("❌ Error inicializando componentes:", error);
     }
   }
 
@@ -51,19 +55,25 @@ export class CogniFitSDK {
    * Generar client_hash según la documentación de CogniFit
    * client_hash = SHA1(client_id + client_secret + user_token)
    */
-  private async generateClientHash(clientId: string, clientSecret: string, userToken: string): Promise<string> {
+  private async generateClientHash(
+    clientId: string,
+    clientSecret: string,
+    userToken: string
+  ): Promise<string> {
     // Crear el string a hashear
     const dataToHash = clientId + clientSecret + userToken;
-    
+
     // Usar Web Crypto API para generar SHA1
     const encoder = new TextEncoder();
     const data = encoder.encode(dataToHash);
-    const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-    
+    const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+
     // Convertir el hash a hexadecimal
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
     return hashHex;
   }
 
@@ -74,7 +84,7 @@ export class CogniFitSDK {
     try {
       // Si no se proporciona versión, usar la más reciente
       if (!version && !this.sdkVersion) {
-        this.sdkVersion = 'v2.0';
+        this.sdkVersion = "v2.0";
       } else if (version) {
         this.sdkVersion = version;
       }
@@ -82,21 +92,25 @@ export class CogniFitSDK {
       return new Promise((resolve, reject) => {
         // Si ya está cargado, resolver inmediatamente
         if (this.isSDKLoaded && window.HTML5JS) {
-          console.log('✅ SDK ya cargado');
+          console.log("✅ SDK ya cargado");
           resolve();
+
           return;
         }
 
-        console.log('🔄 INTENTANDO cargar SDK REAL de CogniFit...');
-        console.log('🌐 Si falla por autorización de dominio, se usará simulación');
+        console.log("🔄 INTENTANDO cargar SDK REAL de CogniFit...");
+        console.log(
+          "🌐 Si falla por autorización de dominio, se usará simulación"
+        );
 
-        const script = document.createElement('script');
+        const script = document.createElement("script");
+
         script.src = `https://js.cognifit.com/${this.sdkVersion}/html5Loader.js`;
         script.async = true;
-        script.crossOrigin = 'anonymous';
+        script.crossOrigin = "anonymous";
 
         const timeoutId = setTimeout(() => {
-          console.warn('⏱️ Timeout cargando SDK real - usando simulación');
+          console.warn("⏱️ Timeout cargando SDK real - usando simulación");
           this.createFallbackSDK();
           this.isSDKLoaded = true;
           resolve();
@@ -106,10 +120,10 @@ export class CogniFitSDK {
           clearTimeout(timeoutId);
           this.isSDKLoaded = true;
           if (window.HTML5JS) {
-            console.log('🎉 ¡SDK REAL de CogniFit cargado exitosamente!');
-            console.log('🎮 Los juegos serán completamente interactivos');
+            console.log("🎉 ¡SDK REAL de CogniFit cargado exitosamente!");
+            console.log("🎮 Los juegos serán completamente interactivos");
           } else {
-            console.warn('⚠️ SDK cargado pero HTML5JS no disponible');
+            console.warn("⚠️ SDK cargado pero HTML5JS no disponible");
             this.createFallbackSDK();
           }
           resolve();
@@ -117,33 +131,36 @@ export class CogniFitSDK {
 
         script.onerror = (error) => {
           clearTimeout(timeoutId);
-          console.error('❌ No se pudo cargar SDK real desde:', script.src);
-          console.error('🔒 Razones posibles:');
-          console.error('   • Dominio no autorizado por CogniFit');
-          console.error('   • Problemas de CORS');
-          console.error('   • SDK no disponible públicamente');
-          console.log('🔄 Usando simulación como alternativa');
-          
+          console.error("❌ No se pudo cargar SDK real desde:", script.src);
+          console.error("🔒 Razones posibles:");
+          console.error("   • Dominio no autorizado por CogniFit");
+          console.error("   • Problemas de CORS");
+          console.error("   • SDK no disponible públicamente");
+          console.log("🔄 Usando simulación como alternativa");
+
           this.createFallbackSDK();
           this.isSDKLoaded = true;
           resolve(); // No rechazar para que la app siga funcionando
         };
 
         // Verificar si ya existe el script
-        const existingScript = document.querySelector(`script[src="${script.src}"]`);
+        const existingScript = document.querySelector(
+          `script[src="${script.src}"]`
+        );
+
         if (existingScript) {
           clearTimeout(timeoutId);
           if (window.HTML5JS) {
             this.isSDKLoaded = true;
-            console.log('✅ SDK ya existe y está funcionando');
+            console.log("✅ SDK ya existe y está funcionando");
             resolve();
           } else {
-            existingScript.addEventListener('load', () => {
+            existingScript.addEventListener("load", () => {
               clearTimeout(timeoutId);
               this.isSDKLoaded = true;
               resolve();
             });
-            existingScript.addEventListener('error', () => {
+            existingScript.addEventListener("error", () => {
               clearTimeout(timeoutId);
               this.createFallbackSDK();
               this.isSDKLoaded = true;
@@ -151,13 +168,14 @@ export class CogniFitSDK {
             });
           }
         } else {
-          console.log('📥 Descargando SDK desde:', script.src);
+          console.log("📥 Descargando SDK desde:", script.src);
           document.head.appendChild(script);
         }
       });
     } catch (error) {
-      console.error('❌ Error crítico cargando SDK:', error);
+      console.error("❌ Error crítico cargando SDK:", error);
       this.createFallbackSDK();
+
       return Promise.resolve();
     }
   }
@@ -166,14 +184,27 @@ export class CogniFitSDK {
    * Crear una versión de fallback del SDK si no se puede cargar el real
    */
   private createFallbackSDK(): void {
-    console.warn('Usando SDK de fallback - los juegos serán simulaciones');
-    
+    console.warn("Usando SDK de fallback - los juegos serán simulaciones");
+
     if (!window.HTML5JS) {
       (window as any).HTML5JS = {
-        loadMode: (version: string, mode: string, key: string, elementId: string, config: any) => {
-          console.log('Cargando juego con SDK de fallback:', { version, mode, key, elementId, config });
-          
+        loadMode: (
+          version: string,
+          mode: string,
+          key: string,
+          elementId: string,
+          config: any
+        ) => {
+          console.log("Cargando juego con SDK de fallback:", {
+            version,
+            mode,
+            key,
+            elementId,
+            config,
+          });
+
           const container = document.getElementById(elementId);
+
           if (container) {
             container.innerHTML = `
               <div style="
@@ -247,7 +278,7 @@ export class CogniFitSDK {
               </div>
             `;
           }
-        }
+        },
       };
     }
   }
@@ -261,19 +292,21 @@ export class CogniFitSDK {
       await this.loadSDK(params.version);
 
       if (!window.HTML5JS) {
-        throw new Error('SDK de CogniFit no está disponible');
+        throw new Error("SDK de CogniFit no está disponible");
       }
 
       // Verificar que el elemento de destino existe
       const targetElement = document.getElementById(params.elementId);
+
       if (!targetElement) {
         throw new Error(`Elemento con ID ${params.elementId} no encontrado`);
       }
 
       // Limpiar el contenedor antes de cargar el juego
-      targetElement.innerHTML = '<div id="cogniFitContent">Cargando juego...</div>';
+      targetElement.innerHTML =
+        '<div id="cogniFitContent">Cargando juego...</div>';
 
-      console.log('Lanzando juego con parámetros:', {
+      console.log("Lanzando juego con parámetros:", {
         version: params.version,
         mode: params.mode,
         key: params.key,
@@ -297,9 +330,8 @@ export class CogniFitSDK {
           appType: params.config.appType,
         }
       );
-
     } catch (error) {
-      console.error('Error lanzando juego:', error);
+      console.error("Error lanzando juego:", error);
       throw error;
     }
   }
@@ -308,95 +340,99 @@ export class CogniFitSDK {
    * Lanzar juego REAL usando la API directa de CogniFit (método oficial)
    */
   async launchRealGame(
-    gameKey: string, 
-    config: CogniFitSDKConfig, 
+    gameKey: string,
+    config: CogniFitSDKConfig,
     userToken: string,
-    elementId: string = 'cognifit-game-container'
+    elementId: string = "cognifit-game-container"
   ): Promise<void> {
     try {
-      console.log('🎮 CARGANDO JUEGO REAL con API directa de CogniFit...');
+      console.log("🎮 CARGANDO JUEGO REAL con API directa de CogniFit...");
       console.log(`🔑 Juego: ${gameKey}`);
       console.log(`🆔 Cliente: ${config.clientId}`);
       console.log(`👤 Usuario: ${userToken.substring(0, 8)}...`);
 
-      // Obtener CLIENT_SECRET desde el servidor
-      const clientSecretResponse = await fetch('/api/cognifit/get-client-secret');
-      
-      if (!clientSecretResponse.ok) {
-        throw new Error('No se pudo obtener CLIENT_SECRET desde el servidor');
+      // Obtener CLIENT_HASH fijo desde el servidor (como lo muestra el tutorial de CogniFit)
+      const clientHashResponse = await fetch("/api/cognifit/get-client-hash");
+
+      if (!clientHashResponse.ok) {
+        throw new Error("No se pudo obtener CLIENT_HASH desde el servidor");
       }
-      
-      const { clientSecret } = await clientSecretResponse.json();
-      console.log('🔐 CLIENT_SECRET obtenido del servidor');
 
-      // Generar client_hash (SHA1 de client_id + client_secret + user_token)
-      const clientHash = await this.generateClientHash(config.clientId, clientSecret, userToken);
-      console.log('🔐 Client hash generado:', clientHash.substring(0, 8) + '...');
+      const { clientHash } = await clientHashResponse.json();
 
-      // Usar la API directa de CogniFit como se muestra en la documentación
-      const cognifitUrl = `https://api.cognifit.com/partner/${clientHash}?client_id=${config.clientId}&user_token=${userToken}&callback_url=${encodeURIComponent('http://localhost:3000/callback')}&setting=${encodeURIComponent(JSON.stringify([{type: 'task', key: gameKey}]))}`;
-      
-      console.log('🌐 Creando iframe para juego real...');
+      console.log(
+        "🔐 CLIENT_HASH fijo obtenido:",
+        clientHash.substring(0, 8) + "..."
+      );
+
+      // Usar la URL correcta según tutorial oficial de CogniFit
+      const cognifitUrl = `https://www.cognifit.com/partner/${clientHash}?client_id=${config.clientId}&user_token=${userToken}&callback_url=${encodeURIComponent("http://localhost:3000/callback")}&setting=${encodeURIComponent(JSON.stringify([{ type: "task", key: gameKey }]))}`;
+
+      console.log("🌐 Creando iframe para juego real con dominio correcto...");
 
       // Crear iframe para cargar el juego real
       const container = document.getElementById(elementId);
+
       if (!container) {
         throw new Error(`Contenedor ${elementId} no encontrado`);
       }
 
       // Limpiar contenedor
-      container.innerHTML = '';
+      container.innerHTML = "";
 
       // Crear iframe para el juego real
-      const iframe = document.createElement('iframe');
+      const iframe = document.createElement("iframe");
+
       iframe.src = cognifitUrl;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '8px';
-      iframe.allow = 'fullscreen';
-      
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.style.border = "none";
+      iframe.style.borderRadius = "8px";
+      iframe.allow = "fullscreen";
+
       // Agregar iframe al contenedor
       container.appendChild(iframe);
 
       // Configurar listener para mensajes del juego
       const messageHandler = (event: MessageEvent) => {
-        if (event.origin !== 'https://api.cognifit.com') return;
-        
-        console.log('🎮 Mensaje del juego REAL:', event.data);
-        
+        if (event.origin !== "https://api.cognifit.com") return;
+
+        console.log("🎮 Mensaje del juego REAL:", event.data);
+
         // Reenviar el mensaje como evento personalizado
-        window.postMessage({
-          type: 'cognifitGameReal',
-          status: event.data.status || 'running',
-          key: gameKey,
-          data: event.data
-        }, '*');
+        window.postMessage(
+          {
+            type: "cognifitGameReal",
+            status: event.data.status || "running",
+            key: gameKey,
+            data: event.data,
+          },
+          "*"
+        );
 
         // Si el juego se completa, limpiar el listener
-        if (event.data.status === 'completed') {
-          window.removeEventListener('message', messageHandler);
+        if (event.data.status === "completed") {
+          window.removeEventListener("message", messageHandler);
         }
       };
 
       // Escuchar mensajes del iframe
-      window.addEventListener('message', messageHandler);
+      window.addEventListener("message", messageHandler);
 
-      console.log('🎯 ¡JUEGO REAL DE COGNIFIT CARGADO EN IFRAME!');
-      console.log('🔗 URL del juego:', cognifitUrl.substring(0, 80) + '...');
-      
+      console.log("🎯 ¡JUEGO REAL DE COGNIFIT CARGADO EN IFRAME!");
+      console.log("🔗 URL del juego:", cognifitUrl.substring(0, 80) + "...");
     } catch (error) {
-      console.error('❌ Error lanzando juego REAL:', error);
-      console.log('🔄 Fallback: usando simulación como alternativa');
-      
+      console.error("❌ Error lanzando juego REAL:", error);
+      console.log("🔄 Fallback: usando simulación como alternativa");
+
       // Crear SDK de fallback y lanzar simulación
       this.createFallbackSDK();
       await this.launchGame({
         version: config.version,
-        mode: 'gameMode',
-        key: gameKey, 
+        mode: "gameMode",
+        key: gameKey,
         elementId: elementId,
-        config: config
+        config: config,
       });
     }
   }
@@ -405,34 +441,41 @@ export class CogniFitSDK {
    * Configurar el listener para mensajes del juego
    */
   private setupMessageListener(): void {
-    if (typeof window === 'undefined') return;
-    
-    window.addEventListener('message', (event) => {
+    if (typeof window === "undefined") return;
+
+    window.addEventListener("message", (event) => {
       // Verificar que el mensaje viene de CogniFit o es simulado
-      const isSimulated = event.source === window && event.data.type === 'cognifitGame';
-      const isCogniFit = event.origin === 'https://www.cognifit.com' || 
-                        event.origin === 'https://js.cognifit.com';
-      
+      const isSimulated =
+        event.source === window && event.data.type === "cognifitGame";
+      const isCogniFit =
+        event.origin === "https://www.cognifit.com" ||
+        event.origin === "https://js.cognifit.com";
+
       if (!isSimulated && !isCogniFit) {
         return;
       }
 
       let data: GameCompletionResponse;
-      
+
       if (isSimulated) {
         // Convertir formato simulado al formato esperado
         data = {
           status: event.data.status,
           key: event.data.key,
           score: event.data.score,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
       } else {
         data = event.data as GameCompletionResponse;
       }
 
-      if (data && (data.status === 'completed' || data.status === 'aborted' || data.status === 'loginError')) {
-        console.log('Juego terminado:', data);
+      if (
+        data &&
+        (data.status === "completed" ||
+          data.status === "aborted" ||
+          data.status === "loginError")
+      ) {
+        console.log("Juego terminado:", data);
         this.handleGameCompletion(data);
       }
     });
@@ -442,10 +485,10 @@ export class CogniFitSDK {
    * Manejar la finalización del juego
    */
   private handleGameCompletion(data: GameCompletionResponse): void {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     // Emitir evento personalizado para que los componentes puedan escucharlo
-    const gameCompletionEvent = new CustomEvent('cognifitGameCompletion', {
+    const gameCompletionEvent = new CustomEvent("cognifitGameCompletion", {
       detail: data,
     });
 
@@ -467,8 +510,9 @@ export class CogniFitSDK {
    */
   cleanupGame(elementId: string): void {
     const targetElement = document.getElementById(elementId);
+
     if (targetElement) {
-      targetElement.innerHTML = '';
+      targetElement.innerHTML = "";
     }
   }
 
@@ -494,6 +538,7 @@ export function getCogniFitSDK(): CogniFitSDK {
   if (!cogniFitSDKInstance) {
     cogniFitSDKInstance = new CogniFitSDK();
   }
+
   return cogniFitSDKInstance;
 }
 
@@ -501,13 +546,13 @@ export function getCogniFitSDK(): CogniFitSDK {
 export async function launchCogniFitGame(
   gameKey: string,
   config: CogniFitSDKConfig,
-  elementId: string = 'cognifit-game-container'
+  elementId: string = "cognifit-game-container"
 ): Promise<void> {
   const sdk = getCogniFitSDK();
-  
+
   await sdk.launchGame({
     version: config.version,
-    mode: 'gameMode',
+    mode: "gameMode",
     key: gameKey,
     elementId,
     config,
@@ -517,13 +562,13 @@ export async function launchCogniFitGame(
 export async function launchCogniFitTraining(
   trainingKey: string,
   config: CogniFitSDKConfig,
-  elementId: string = 'cognifit-game-container'
+  elementId: string = "cognifit-game-container"
 ): Promise<void> {
   const sdk = getCogniFitSDK();
-  
+
   await sdk.launchGame({
     version: config.version,
-    mode: 'trainingMode',
+    mode: "trainingMode",
     key: trainingKey,
     elementId,
     config,
@@ -533,17 +578,17 @@ export async function launchCogniFitTraining(
 export async function launchCogniFitAssessment(
   assessmentKey: string,
   config: CogniFitSDKConfig,
-  elementId: string = 'cognifit-game-container'
+  elementId: string = "cognifit-game-container"
 ): Promise<void> {
   const sdk = getCogniFitSDK();
-  
+
   await sdk.launchGame({
     version: config.version,
-    mode: 'assessmentMode',
+    mode: "assessmentMode",
     key: assessmentKey,
     elementId,
     config,
   });
 }
 
-export default CogniFitSDK; 
+export default CogniFitSDK;
